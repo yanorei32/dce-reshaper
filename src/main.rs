@@ -68,7 +68,6 @@ mod parse_datetime {
     use serde::{self, Deserialize, Deserializer};
 
     const FORMAT: &'static str = "%FT%T%.3f%:z";
-
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
     where
         D: Deserializer<'de>,
@@ -101,30 +100,24 @@ fn main() {
     let silence_threshold = Duration::minutes(config.silence_threshold_min);
 
     for message in data.messages {
-        let mut body = message.content;
-
-        for transform in (&config.transforms).into_iter() {
-            match transform {
-                Transform::Regex(t) => {
-                    body = t.from.replace_all(&body, t.to.as_str()).to_string();
-                }
-                Transform::ReplaceAll(t) => {
-                    body = body.replace(t.from.as_str(), t.to.as_str());
-                }
-            }
-        }
-
-        body = body.trim().to_string();
+        let body = (&config.transforms)
+            .into_iter()
+            .fold(message.content, |s, transform| match &transform {
+                Transform::Regex(t) => t.from.replace_all(s.as_str(), t.to.as_str()).to_string(),
+                Transform::ReplaceAll(t) => s.replace(t.from.as_str(), t.to.as_str()).to_string(),
+            })
+            .trim()
+            .to_string();
 
         if body.len() == 0 {
             continue;
         }
 
-        let elapsed_time = message.timestamp - prev_dt;
-
-        if elapsed_time > silence_threshold {
+        if silence_threshold < message.timestamp - prev_dt {
             print!("<silence>");
         }
+
+        prev_dt = message.timestamp;
 
         if prev_user == message.author.name {
             print!("<sep>");
@@ -132,9 +125,8 @@ fn main() {
             print!("\n");
         }
 
-        print!("{}", body);
-
         prev_user = message.author.name;
-        prev_dt = message.timestamp;
+
+        print!("{}", body);
     }
 }

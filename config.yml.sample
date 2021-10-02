@@ -1,0 +1,89 @@
+silence_threshold_min: 3
+
+transforms:
+  # codeblock
+  - type: "Regex"
+    from: "(?ms)```.*?```"
+    to: ""
+
+  # uri
+  - type: "Regex"
+    from: "[^ ]*://[^ ]*"
+    to: ""
+
+  # quote
+  - type: "Regex"
+    from: "^>.*$"
+    to: ""
+
+  # remove < and >
+  - type: "ReplaceAll"
+    from: "<"
+    to: ""
+
+  - type: "ReplaceAll"
+    from: ">"
+    to: ""
+
+  # replace emoticons
+  - type: "Regex"
+    from: ":.*?:"
+    to: "<unk>"
+
+  - type: "Regex"
+    from: ";.*?;"
+    to: "<unk>"
+
+  # inline codeblock
+  - type: "Regex"
+    from: "`.*?`"
+    to: "<unk>"
+
+  # replace usernames
+  - type: "Regex"
+    from: "@[^ ]*"
+    to: "<user>"
+
+  # Fruit Server style dot only communications
+  - type: "Regex"
+    from: "^\\.+$"
+    to: "<laugh>"
+
+  - type: "Regex"
+    from: "草+$"
+    to: "<laugh>"
+
+  - type: "Regex"
+    from: "ww+"
+    to: "<laugh>"
+
+  - type: "Regex"
+    from: "ｗ+"
+    to: "<laugh>"
+
+  # Remove markdown chars
+  - type: "ReplaceAll"
+    from: "*"
+    to: ""
+
+  - type: "ReplaceAll"
+    from: "~"
+    to: ""
+
+  - type: "ReplaceAll"
+    from: "|"
+    to: ""
+
+  - type: "ReplaceAll"
+    from: "_"
+    to: ""
+
+  - type: "ReplaceAll"
+    from: "\\"
+    to: ""
+
+  # Separator
+  - type: "Regex"
+    from: "\\n+"
+    to: "<sep>"
+

@@ -79,20 +79,17 @@ mod parse_datetime {
 }
 
 fn main() {
-    let reader = BufReader::new(
+    let data: DiscordChatExporterJson = serde_json::from_reader(BufReader::new(
         File::open(env::var("JSON").expect("Failed to get JSON env"))
             .expect("Failed to open JSON file"),
-    );
+    ))
+    .expect("Failed to parse JSON");
 
-    let data: DiscordChatExporterJson =
-        serde_json::from_reader(reader).expect("Failed to parse JSON");
-
-    let reader = BufReader::new(
+    let config: Config = serde_yaml::from_reader(BufReader::new(
         File::open(env::var("CONFIG").expect("Failed to get CONFIG env"))
             .expect("Failed to open CONFIG file"),
-    );
-
-    let config: Config = serde_yaml::from_reader(reader).expect("Failed to parse YAML");
+    ))
+    .expect("Failed to parse YAML");
 
     let mut prev_dt = chrono::MIN_DATETIME;
     let mut prev_user = "".to_string();

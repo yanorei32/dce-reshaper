@@ -67,7 +67,7 @@ mod parse_datetime {
     use chrono::{DateTime, TimeZone, Utc};
     use serde::{self, Deserialize, Deserializer};
 
-    const FORMAT: &'static str = "%FT%T%.3f%:z";
+    const FORMAT: &str = "%FT%T%.3f%:z";
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
     where
         D: Deserializer<'de>,
@@ -98,15 +98,15 @@ fn main() {
 
     for message in data.messages {
         let body = (&config.transforms)
-            .into_iter()
+            .iter()
             .fold(message.content, |s, transform| match &transform {
                 Transform::Regex(t) => t.from.replace_all(s.as_str(), t.to.as_str()).to_string(),
-                Transform::ReplaceAll(t) => s.replace(t.from.as_str(), t.to.as_str()).to_string(),
+                Transform::ReplaceAll(t) => s.replace(t.from.as_str(), t.to.as_str()),
             })
             .trim()
             .to_string();
 
-        if body.len() == 0 {
+        if body.is_empty() {
             continue;
         }
 
@@ -119,7 +119,7 @@ fn main() {
         if prev_user == message.author.name {
             print!("<sep>");
         } else {
-            print!("\n");
+            println!();
         }
 
         prev_user = message.author.name;
